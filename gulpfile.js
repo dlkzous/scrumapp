@@ -6,6 +6,7 @@ var jshint = require('gulp-jshint');
 var nodemon = require('gulp-nodemon');
 var install = require('gulp-install');
 var del = require('del');
+var mocha = require('gulp-mocha');
 
 // JS hint task
 gulp.task('jshint', function() {
@@ -34,6 +35,12 @@ gulp.task('start', function () {
     , ext: 'js'
     , env: { 'NODE_ENV': 'development' }
   });
+});
+
+// Task to run mocha test
+gulp.task('test', function() {
+  gulp.src('./tests/main.js', {read: false})
+    .pipe(mocha({reporter: 'nyan'}));
 });
 
 // The default task (called when you run `gulp` from cli)
