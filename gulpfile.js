@@ -2,11 +2,12 @@
 var gulp = require('gulp');
 
 // include plug-ins
-var jshint = require('gulp-jshint');
-var nodemon = require('gulp-nodemon');
-var install = require('gulp-install');
-var del = require('del');
-var mocha = require('gulp-mocha');
+var jshint = require('gulp-jshint')
+  , nodemon = require('gulp-nodemon')
+  , install = require('gulp-install')
+  , del = require('del')
+  , mocha = require('gulp-mocha')
+  , child_process = require('child_process');
 
 // JS hint task
 gulp.task('jshint', function() {
@@ -28,8 +29,16 @@ gulp.task('clean', function() {
   });
 });
 
+// Start the database server
+gulp.task('startdb', function() {
+  child_process.exec('sudo mongod --dbpath ./data --nojournal', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+  });
+});
+
 // Start server using nodemon
-gulp.task('start', function () {
+gulp.task('start', ['startdb'], function () {
   nodemon({
       script: 'bin/www'
     , ext: 'js'

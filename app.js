@@ -1,14 +1,36 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var HttpStatus = require('http-status');
-
-var routes = require('./routes/index');
+var appPath = __dirname
+  , express = require('express')
+  , path = require('path')
+  , favicon = require('serve-favicon')
+  , logger = require('morgan')
+  , cookieParser = require('cookie-parser')
+  , bodyParser = require('body-parser')
+  , HttpStatus = require('http-status')
+  , path = require('path')
+  , fs = require('fs')
+  , mongoose = require('mongoose')
+  , everyauth = require('everyauth')
+  , config = require('./config.js');
 
 var app = express();
+
+// if you like to see what is going on, set this to true
+if(app.get('env') === 'development') {
+  everyauth.debug = true;
+} else {
+  everyauth.debug = false;
+}
+
+/** Connect to database and load models **/
+mongoose.connect(config.dbPath);
+var models_path = appPath + '/models';
+fs.readdirSync(models_path).forEach(function (file) {
+    require(models_path+'/'+file)
+});
+var UserModel = mongoose.model('UserModel');
+
+
+var routes = require('./routes/index');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
