@@ -31,7 +31,7 @@ gulp.task('clean', function() {
 
 // Start the database server
 gulp.task('startdb', function() {
-  child_process.exec('sudo mongod --dbpath ./data --nojournal', function(err, stdout, stderr) {
+  child_process.exec('mongod --nojournal', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
   });

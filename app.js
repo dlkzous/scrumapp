@@ -4,13 +4,15 @@ var appPath = __dirname
   , favicon = require('serve-favicon')
   , logger = require('morgan')
   , cookieParser = require('cookie-parser')
+  , session = require('express-session')
   , bodyParser = require('body-parser')
   , HttpStatus = require('http-status')
   , path = require('path')
   , fs = require('fs')
   , mongoose = require('mongoose')
   , everyauth = require('everyauth')
-  , config = require('./config.js');
+  , config = require('./config.js')
+  , secretdata = require('./secretdata.js');
 
 var app = express();
 
@@ -29,6 +31,56 @@ fs.readdirSync(models_path).forEach(function (file) {
 });
 var UserModel = mongoose.model('UserModel');
 
+/**
+ * Social login integration using Facebook
+ */
+everyauth.everymodule.findUserById(function(userId,callback) {
+    UserModel.findOne({facebook_id: userId},function(err, user) {
+        callback(user, err);
+    });
+});
+everyauth.facebook
+    .appId(secretdata.FACEBOOK_APP_ID)
+    .appSecret(secretdata.FACEBOOK_APP_SECRET)
+    .scope('email,user_location,user_photos,publish_actions')
+    .handleAuthCallbackError( function (req, res) {
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        res.json({
+          message: 'Error Occured'
+        });
+    })
+    .findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
+
+        var promise = this.Promise();
+        UserModel.findOne({facebook_id: fbUserMetadata.id},function(err, user) {
+            if (err) return promise.fulfill([err]);
+
+            if(user) {
+                // user found, life is good
+                promise.fulfill(user);
+            } else {
+                // create new user
+                var User = new UserModel({
+                    name: fbUserMetadata.name,
+                    firstname: fbUserMetadata.first_name,
+                    lastname: fbUserMetadata.last_name,
+                    email: fbUserMetadata.email,
+                    username: fbUserMetadata.username,
+                    gender: fbUserMetadata.gender,
+                    facebook_id: fbUserMetadata.id,
+                    facebook: fbUserMetadata
+                });
+
+                User.save(function(err,user) {
+                    if (err) return promise.fulfill([err]);
+                    promise.fulfill(user);
+                });
+            }
+        });
+        return promise;
+    })
+    .redirectPath('/');
+
 
 var routes = require('./routes/index');
 
@@ -37,7 +89,9 @@ var routes = require('./routes/index');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(secretdata.COOKIE_PARSER_SECRET));
+app.use(session());
+app.use(everyauth.middleware());
 
 app.use('/', routes);
 

@@ -11,6 +11,7 @@
     "debug": "~2.2.0",
     "everyauth": "^0.4.9",
     "express": "~4.13.1",
+    "express-session": "^1.11.3",
     "fs": "0.0.2",
     "http-status": "^0.2.0",
     "mongoose": "^4.1.6",
