@@ -48,8 +48,15 @@ gulp.task('start', ['startdb'], function () {
 
 // Task to run mocha test
 gulp.task('test', function() {
-  gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'nyan'}));
+  // Run test
+  gulp.src('./tests/*.js', {read: false})
+    .pipe(mocha({reporter: 'nyan'}))
+    .once('error', function () {
+      process.exit(1);
+    })
+    .once('end', function () {
+      process.exit();
+    });
 });
 
 // The default task (called when you run `gulp` from cli)

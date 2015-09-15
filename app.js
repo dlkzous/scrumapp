@@ -12,7 +12,8 @@ var appPath = __dirname
   , mongoose = require('mongoose')
   , everyauth = require('everyauth')
   , config = require('./config.js')
-  , secretdata = require('./secretdata.js');
+  , secretdata = require('./secretdata.js')
+  , MongoStore = require('connect-mongo')(session);
 
 var app = express();
 
@@ -27,7 +28,7 @@ if(app.get('env') === 'development') {
 mongoose.connect(config.dbPath);
 var models_path = appPath + '/models';
 fs.readdirSync(models_path).forEach(function (file) {
-    require(models_path+'/'+file)
+    require(models_path+'/'+file);
 });
 var UserModel = mongoose.model('UserModel');
 
@@ -44,7 +45,7 @@ everyauth.facebook
     .appSecret(secretdata.FACEBOOK_APP_SECRET)
     .scope('email,user_location,user_photos,publish_actions')
     .handleAuthCallbackError( function (req, res) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({
           message: 'Error Occured'
         });
@@ -90,7 +91,12 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(secretdata.COOKIE_PARSER_SECRET));
-app.use(session());
+app.use(session({
+    secret: secretdata.SESSION_SECRET
+  , store: new MongoStore({mongooseConnection: mongoose.connection})
+  , resave: false
+  , saveUninitialized: true
+}));
 app.use(everyauth.middleware());
 
 app.use('/', routes);
