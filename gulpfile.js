@@ -53,12 +53,6 @@ gulp.task('startserver', function () {
       script: 'bin/www'
     , ext: 'js'
     , env: { 'NODE_ENV': 'development' }
-  })
-  .on('exit', function() {
-    child_process.exec('mongo --eval "db.getSiblingDB(\'admin\').shutdownServer()"', function(err, stdout, stderr) {
-      console.log(stdout);
-      console.log(stderr);
-    });
   });
 });
 
