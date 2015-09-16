@@ -28,6 +28,7 @@ node_modules
 
 # Database folder
 data
+./dblog.log
 
 # Ignore secret data files
 secretdata.js
