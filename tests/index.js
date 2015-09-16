@@ -1,11 +1,11 @@
-var expect = require('expect.js');
-var superagent = require('superagent');
-var server = require('../bin/www');
-var config = require('./config.js');
+var expect = require('expect.js')
+  , superagent = require('superagent')
+  , server = require('../bin/www')
+  , config = require('./config.js');
 
 describe('homepage', function() {
-  var app;
-  var url = config.baseUrl + ':' + config.port;
+  var app
+    , url = config.baseUrl + ':' + config.port;
 
   before(function () {
     app = server();
