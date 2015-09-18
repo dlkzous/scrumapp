@@ -65,7 +65,7 @@ gulp.task('start', function(callback) {
 gulp.task('mochatest', function() {
   // Run test
   gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'list'}))
+    .pipe(mocha({reporter: 'list'}));
 });
 
 // Task to run start db server, run test and then shutdown db
