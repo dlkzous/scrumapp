@@ -1,7 +1,8 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+  , router = express.Router();
 
-/* GET home page. */
+
+/* GET home api */
 router.route('/')
   .get(function(req, res, next) {
     res.json({

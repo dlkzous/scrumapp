@@ -7,7 +7,9 @@ var jshint = require('gulp-jshint')
   , install = require('gulp-install')
   , del = require('del')
   , mocha = require('gulp-mocha')
-  , child_process = require('child_process');
+  , child_process = require('child_process')
+  , runSequence = require('run-sequence')
+  , postMortem = require('gulp-postmortem');
 
 // JS hint task
 gulp.task('jshint', function() {
@@ -31,14 +33,22 @@ gulp.task('clean', function() {
 
 // Start the database server
 gulp.task('startdb', function() {
-  child_process.exec('mongod --nojournal', function(err, stdout, stderr) {
+  child_process.exec('mongod --fork --logpath ./data/dblog.log --nojournal', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+  });
+});
+
+// Stop the database server
+gulp.task('stopdb', function(callback) {
+  child_process.exec('mongo --eval "db.getSiblingDB(\'admin\').shutdownServer()"', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
   });
 });
 
 // Start server using nodemon
-gulp.task('start', ['startdb'], function () {
+gulp.task('startserver', function () {
   nodemon({
       script: 'bin/www'
     , ext: 'js'
@@ -46,17 +56,21 @@ gulp.task('start', ['startdb'], function () {
   });
 });
 
+// Main task to start database and server
+gulp.task('start', function(callback) {
+  runSequence('startdb', 'startserver', callback);
+});
+
 // Task to run mocha test
-gulp.task('test', function() {
+gulp.task('mochatest', function() {
   // Run test
-  gulp.src('./tests/*.js', {read: false})
-    .pipe(mocha({reporter: 'nyan'}))
-    .once('error', function () {
-      process.exit(1);
-    })
-    .once('end', function () {
-      process.exit();
-    });
+  gulp.src('./tests/main.js', {read: false})
+    .pipe(mocha({reporter: 'list'}));
+});
+
+// Task to run start db server, run test and then shutdown db
+gulp.task('test', function(callback) {
+  runSequence('startdb', 'mochatest', 'stopdb', callback);
 });
 
 // The default task (called when you run `gulp` from cli)

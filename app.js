@@ -36,8 +36,8 @@ var UserModel = mongoose.model('UserModel');
  * Social login integration using Facebook
  */
 everyauth.everymodule.findUserById(function(userId,callback) {
-    UserModel.findOne({facebook_id: userId},function(err, user) {
-        callback(user, err);
+    UserModel.findOne({_id: userId},function(err, user) {
+        callback(err, user);
     });
 });
 everyauth.facebook
@@ -83,7 +83,8 @@ everyauth.facebook
     .redirectPath('/');
 
 
-var routes = require('./routes/index');
+var routes = require('./routes/index')
+  , users = require('./routes/users');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -100,6 +101,7 @@ app.use(session({
 app.use(everyauth.middleware());
 
 app.use('/', routes);
+app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
