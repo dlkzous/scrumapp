@@ -9,5 +9,7 @@ In order to run the tests
 - Run gulp startdb if the database is not yet started
 - Run gulp seed to populate test data into the database
 - Run gulp test to run the tests
+- Run gulp cleardb to clear the seed data from the database
+- Run gulp stopdb to stop the database
 
 Author: Kushal D'Souza

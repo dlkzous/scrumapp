@@ -88,5 +88,13 @@ gulp.task('seed', function() {
   });
 });
 
+// Task to clear seed data from the db
+gulp.task('cleardb', function() {
+  child_process.exec('mongo scrumapi --eval "db.users.remove({})"', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+  });
+});
+
 // The default task (called when you run `gulp` from cli)
 gulp.task('default', ['start']);
