@@ -36,6 +36,7 @@ gulp.task('startdb', function() {
   child_process.exec('mongod --fork --logpath ./data/dblog.log --nojournal', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
+    return stdout;
   });
 });
 
@@ -44,6 +45,7 @@ gulp.task('stopdb', function(callback) {
   child_process.exec('mongo --eval "db.getSiblingDB(\'admin\').shutdownServer()"', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
+    return stdout;
   });
 });
 
@@ -64,19 +66,13 @@ gulp.task('start', function(callback) {
 // Task to run mocha test
 gulp.task('mochatest', function() {
   // Run test
-  gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'list'}))
-    .once('error', function () {
-        process.exit(1);
-    })
-    .once('end', function () {
-        process.exit();
-    });
+  return gulp.src('./tests/main.js', {read: false})
+    .pipe(mocha({reporter: 'list'}));
 });
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('mochatest', callback);
+  runSequence('startdb', 'seed', 'mochatest', 'stopdb', callback);
 });
 
 // Task to seed database
@@ -85,6 +81,7 @@ gulp.task('seed', function() {
   child_process.exec('mongoimport --db scrumapi --collection users --file ./tests/db/users.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
+    return stdout;
   });
 });
 
