@@ -1,13 +1,13 @@
 var mongoose = require('mongoose')
   , express = require('express')
   , router = express.Router()
-  , UserModel = mongoose.model('UserModel')
+  , User = mongoose.model('User')
   , HttpStatus = require('http-status');
 
 // Users api
 router.route('/')
   .get(function(req, res) {
-    UserModel.find(function(err, users) {
+    User.find(function(err, users) {
       res.json({
         users: users
       });

@@ -65,12 +65,27 @@ gulp.task('start', function(callback) {
 gulp.task('mochatest', function() {
   // Run test
   gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'list'}));
+    .pipe(mocha({reporter: 'list'}))
+    .once('error', function () {
+        process.exit(1);
+    })
+    .once('end', function () {
+        process.exit();
+    });
 });
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('startdb', 'mochatest', 'stopdb', callback);
+  runSequence('mochatest', callback);
+});
+
+// Task to seed database
+gulp.task('seed', function() {
+  // Seed users
+  child_process.exec('mongoimport --db scrumapi --collection users --file ./tests/db/users.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+  });
 });
 
 // The default task (called when you run `gulp` from cli)

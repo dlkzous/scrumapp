@@ -15,11 +15,22 @@ describe('usersapi', function() {
     app.close();
   });
 
-  it('should return an empty list without any users', function(done) {
+  it('should return a list with a single user', function(done) {
     superagent.get(url + '/users').end(function(err, res) {
       expect(res.status).to.equal(200);
       expect(res.body).to.eql({
-          users: []
+          users: [
+                  {
+                      _id: "5603d450951764890c6d012d"
+                    , name: "Kushal D'Souza"
+                    , facebook_id: "10156106043525077"
+                    , facebook: {
+                          name: "Kushal D'Souza"
+                        , id: "10156106043525077"
+                        }
+                    , __v: 0
+                  }
+                ]
       });
       done();
     });

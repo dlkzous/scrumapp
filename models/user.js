@@ -14,4 +14,4 @@ var UserSchema = Schema({
     facebook: {}
 });
 
-mongoose.model('UserModel', UserSchema);
+mongoose.model('User', UserSchema);
