@@ -1,23 +1,16 @@
 var expect = require('expect.js')
-  , httpMocks = require('node-mocks-http')
+  , mockHandler = require('./helpers/mockHandler')
   , getApiInformation = require('../routes/index/getApiInformation');
 
 describe('homepage', function() {
 
   it('should respond to GET with api metadata', function(done) {
 
-    // Create mock request
-    var request = httpMocks.createRequest({
-        method: 'GET'
-      , url: '/'
-    });
+    var service = mockHandler('GET', '/', false);
 
-    // Create mock response
-    var response = response = httpMocks.createResponse();
-
-    getApiInformation(request, response);
-    var data = JSON.parse(response._getData());
-    expect(response.statusCode).to.equal(200);
+    getApiInformation(service.request, service.response);
+    var data = JSON.parse(service.response._getData());
+    expect(service.response.statusCode).to.equal(200);
     expect(data).to.eql({
         title: 'ScrumAPI'
       , version: '0.0.1'

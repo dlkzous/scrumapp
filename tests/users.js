@@ -1,7 +1,7 @@
 var expect = require('expect.js')
   , mongoose = require('mongoose')
   , config = require('./config')
-  , httpMocks = require('node-mocks-http')
+  , mockHandler = require('./helpers/mockHandler')
   , User = require('../models/user')
   , getAllUsers = require('../routes/users/getAllUsers')
   , getMyProfile = require('../routes/users/getMyProfile');
@@ -23,21 +23,12 @@ describe('usersapi', function() {
 
   it('should return a list with a single user', function(done) {
 
-    // Create mock request
-    var request = httpMocks.createRequest({
-        method: 'GET'
-      , url: '/users'
-    });
+    var service = mockHandler('GET', '/users', true);
 
-    // Create mock response
-    var response = httpMocks.createResponse({
-      eventEmitter: require('events').EventEmitter
-    });
-
-    getAllUsers(request, response);
-    response.on('end', function() {
-      var data = JSON.parse(response._getData());
-      expect(response.statusCode).to.equal(200);
+    getAllUsers(service.request, service.response);
+    service.response.on('end', function() {
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(200);
       expect(data).to.eql({
           users: [
                   {
@@ -54,5 +45,52 @@ describe('usersapi', function() {
       });
       done();
     });
+  });
+
+  it('should return a valid message and status code if the user is not logged in', function(done) {
+
+    var service = mockHandler('GET', '/users/profile', false);
+
+    // Mock unauthenticated user
+    service.request.session = {
+      auth: false
+    };
+
+    getMyProfile(service.request, service.response);
+    var data = JSON.parse(service.response._getData());
+    expect(service.response.statusCode).to.equal(401);
+    expect(data).to.eql({
+      message: 'You need to be logged in to view this information'
+    });
+    done();
+  });
+
+  it('should return the user profile if the user is authenticated', function(done) {
+
+    var service = mockHandler('GET', '/users/profile', false);
+
+    // Mock authenticated user
+    service.request = {
+        session: {
+          auth: true
+        }
+      , user: {
+        toObject: function() {
+          return {
+            name: 'Test user'
+          };
+        }
+      }
+    };
+
+    getMyProfile(service.request, service.response);
+    var data = JSON.parse(service.response._getData());
+    expect(service.response.statusCode).to.equal(200);
+    expect(data).to.eql({
+      user: {
+        name: 'Test user'
+      }
+    });
+    done();
   });
 });
