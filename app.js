@@ -30,7 +30,7 @@ var models_path = appPath + '/models';
 fs.readdirSync(models_path).forEach(function (file) {
     require(models_path+'/'+file);
 });
-var UserModel = mongoose.model('UserModel');
+var UserModel = mongoose.model('User');
 
 /**
  * Social login integration using Facebook

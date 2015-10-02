@@ -1,27 +1,96 @@
 var expect = require('expect.js')
-  , superagent = require('superagent')
-  , server = require('../bin/www')
-  , config = require('./config.js');
+  , mongoose = require('mongoose')
+  , config = require('./config')
+  , mockHandler = require('./helpers/mockHandler')
+  , User = require('../models/user')
+  , getAllUsers = require('../routes/users/getAllUsers')
+  , getMyProfile = require('../routes/users/getMyProfile');
 
 describe('usersapi', function() {
-  var app
-    , url = config.baseUrl + ':' + config.port;
 
   before(function () {
-    app = server();
+    /** Connect to database and load models **/
+    mongoose.connect(config.dbPath);
+
+    // Pull in the models required for this test
+    require('../models/user');
+    var UserModel = mongoose.model('User');
   });
 
   after(function() {
-    app.close();
+    mongoose.connection.close();
   });
 
-  it('should return an empty list without any users', function(done) {
-    superagent.get(url + '/users').end(function(err, res) {
-      expect(res.status).to.equal(200);
-      expect(res.body).to.eql({
-          users: []
+  it('should return a list with a single user', function(done) {
+
+    var service = mockHandler('GET', '/users', true);
+
+    getAllUsers(service.request, service.response);
+    service.response.on('end', function() {
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(200);
+      expect(data).to.eql({
+          users: [
+                  {
+                      _id: "5603d450951764890c6d012d"
+                    , name: "Kushal D'Souza"
+                    , facebook_id: "10156106043525077"
+                    , facebook: {
+                          name: "Kushal D'Souza"
+                        , id: "10156106043525077"
+                        }
+                    , __v: 0
+                  }
+                ]
       });
       done();
     });
+  });
+
+  it('should return a valid message and status code if the user is not logged in', function(done) {
+
+    var service = mockHandler('GET', '/users/profile', false);
+
+    // Mock unauthenticated user
+    service.request.session = {
+      auth: false
+    };
+
+    getMyProfile(service.request, service.response);
+    var data = JSON.parse(service.response._getData());
+    expect(service.response.statusCode).to.equal(401);
+    expect(data).to.eql({
+      message: 'You need to be logged in to view this information'
+    });
+    done();
+  });
+
+  it('should return the user profile if the user is authenticated', function(done) {
+
+    var service = mockHandler('GET', '/users/profile', false);
+
+    // Mock authenticated user
+    service.request = {
+        session: {
+          auth: true
+        }
+      , user: {
+        toObject: function() {
+          return {
+            name: 'Test user'
+          };
+        }
+      }
+    };
+
+    getMyProfile(service.request, service.response);
+    var data = JSON.parse(service.response._getData());
+    expect(service.response.statusCode).to.equal(200);
+    expect(data).to.eql({
+      user: {
+        name: 'Test user'
+      }
+    });
+    done();
   });
 });

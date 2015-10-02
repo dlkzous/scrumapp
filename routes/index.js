@@ -1,14 +1,10 @@
 var express = require('express')
-  , router = express.Router();
+  , router = express.Router()
+  , getApiInformation = require('./index/getApiInformation');
 
 
 /* GET home api */
 router.route('/')
-  .get(function(req, res, next) {
-    res.json({
-      title: 'ScrumAPI',
-      version: '0.0.1'
-    });
-  });
+  .get(getApiInformation);
 
 module.exports = router;
