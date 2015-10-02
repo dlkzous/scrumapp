@@ -1,24 +1,44 @@
 var expect = require('expect.js')
-  , superagent = require('superagent')
-  , server = require('../bin/www')
-  , config = require('./config.js');
+  , mongoose = require('mongoose')
+  , config = require('./config')
+  , httpMocks = require('node-mocks-http')
+  , User = require('../models/user')
+  , getAllUsers = require('../routes/users/getAllUsers')
+  , getMyProfile = require('../routes/users/getMyProfile');
 
 describe('usersapi', function() {
-  var app
-    , url = config.baseUrl + ':' + config.port;
 
   before(function () {
-    app = server();
+    /** Connect to database and load models **/
+    mongoose.connect(config.dbPath);
+
+    // Pull in the models required for this test
+    require('../models/user');
+    var UserModel = mongoose.model('User');
   });
 
   after(function() {
-    app.close();
+    mongoose.connection.close();
   });
 
   it('should return a list with a single user', function(done) {
-    superagent.get(url + '/users').end(function(err, res) {
-      expect(res.status).to.equal(200);
-      expect(res.body).to.eql({
+
+    // Create mock request
+    var request = httpMocks.createRequest({
+        method: 'GET'
+      , url: '/users'
+    });
+
+    // Create mock response
+    var response = httpMocks.createResponse({
+      eventEmitter: require('events').EventEmitter
+    });
+
+    getAllUsers(request, response);
+    response.on('end', function() {
+      var data = JSON.parse(response._getData());
+      expect(response.statusCode).to.equal(200);
+      expect(data).to.eql({
           users: [
                   {
                       _id: "5603d450951764890c6d012d"
