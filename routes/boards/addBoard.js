@@ -26,7 +26,7 @@ module.exports = function(req, res) {
 
       board.save(function(err, board) {
         if(err) {
-          res.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          res.status(HttpStatus.INTERNAL_SERVER_ERROR);
           res.json({
             err: err
           });
@@ -45,4 +45,4 @@ module.exports = function(req, res) {
       });
     }
   }
-}
+};
