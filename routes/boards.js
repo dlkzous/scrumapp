@@ -1,12 +1,20 @@
 var express = require('express')
   , router = express.Router()
-  , getAllBoardsByUser = require('./boards/getAllBoardsByUser')
-  , addBoard = require('./boards/addBoard');
+  , getAllBoardsByOwner = require('./boards/getAllBoardsByOwner')
+  , getAllBoardsBelongedTo = require('./boards/getAllBoardsBelongedTo')
+  , addBoard = require('./boards/addBoard')
+  , addMember = require('./boards/addMember');
 
-router.route('/:userid')
-  .get(getAllBoardsByUser);
+router.route('/')
+  .get(getAllBoardsByOwner);
+
+router.route('/other')
+  .get(getAllBoardsBelongedTo);
 
 router.route('/add')
   .post(addBoard);
+
+router.route('/addmember')
+  .post(addMember);
 
 module.exports = router;
