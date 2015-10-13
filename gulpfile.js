@@ -85,6 +85,17 @@ gulp.task('seed', function() {
   });
 });
 
+// Task to delete all test data
+gulp.task('removedata', function() {
+  // Remove data
+  // Seed users
+  child_process.exec('mongo scrumapi --eval "db.users.remove({});db.boards.remove({})"', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    return stdout;
+  });
+});
+
 // Task to clear seed data from the db
 gulp.task('cleardb', function() {
   child_process.exec('mongo scrumapi --eval "db.users.remove({})"', function(err, stdout, stderr) {
