@@ -1,6 +1,6 @@
 var httpMocks = require('node-mocks-http');
 
-module.exports = function(method, url, events) {
+module.exports = function(method, url, events, params, body) {
   var service = {
       request: {}
     , response: {}
@@ -10,6 +10,8 @@ module.exports = function(method, url, events) {
   service.request = httpMocks.createRequest({
       method: method
     , url: url
+    , params: params
+    , body: body
   });
 
   // Create mock response

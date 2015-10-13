@@ -11,10 +11,6 @@ describe('usersapi', function() {
   before(function () {
     /** Connect to database and load models **/
     mongoose.connect(config.dbPath);
-
-    // Pull in the models required for this test
-    require('../models/user');
-    var UserModel = mongoose.model('User');
   });
 
   after(function() {

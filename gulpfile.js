@@ -72,13 +72,23 @@ gulp.task('mochatest', function() {
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('startdb', 'seed', 'mochatest', 'stopdb', callback);
+  runSequence('startdb', 'seedusers', 'mochatest', 'stopdb', callback);
 });
 
-// Task to seed database
-gulp.task('seed', function() {
+// Task to seed users into database
+gulp.task('seedusers', function() {
   // Seed users
   child_process.exec('mongoimport --db scrumapi --collection users --file ./tests/db/users.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    return stdout;
+  });
+});
+
+// Task to seed boards into database
+gulp.task('seedusers', function() {
+  // Seed users
+  child_process.exec('mongoimport --db scrumapi --collection boards --file ./tests/db/boards.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     return stdout;
