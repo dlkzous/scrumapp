@@ -17,7 +17,7 @@ describe('usersapi', function() {
     mongoose.connection.close();
   });
 
-  it('should return a list with a single user', function(done) {
+  it('should return a list with two users', function(done) {
 
     var service = mockHandler('GET', '/users', true);
 
@@ -35,6 +35,15 @@ describe('usersapi', function() {
                           name: "Kushal D'Souza"
                         , id: "10156106043525077"
                         }
+                    , __v: 0
+                  }, {
+                      _id: "5603d450951764890c6d013d"
+                    , name: "Test User"
+                    , facebook_id: "10156106043525333"
+                    , facebook: {
+                        name: "Test User"
+                      , id: "10156106043525333"
+                    }
                     , __v: 0
                   }
                 ]

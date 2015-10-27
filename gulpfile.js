@@ -86,7 +86,7 @@ gulp.task('seedusers', function() {
 });
 
 // Task to seed boards into database
-gulp.task('seedusers', function() {
+gulp.task('seedboards', function() {
   // Seed users
   child_process.exec('mongoimport --db scrumapi --collection boards --file ./tests/db/boards.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
     console.log(stdout);

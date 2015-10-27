@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "562f8b09f1981ba016ada669",
+    "name": "test board",
+    "owner": "562f8ac6f1981ba016ada668",
+    "__v": 0,
+    "members": [ ]
+  },
+  {
+    "_id": "562f8b09f1981ba016ada669",
+    "name": "second board",
+    "owner": "562f8ac6f1981ba016ada668",
+    "__v": 0,
+    "members": [ ]
+  }
+]
