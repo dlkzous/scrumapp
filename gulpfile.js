@@ -72,7 +72,7 @@ gulp.task('mochatest', function() {
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('startdb', 'seedusers', 'mochatest', 'stopdb', callback);
+  runSequence('startdb', 'seedusers', 'seedboards', 'mochatest', 'stopdb', callback);
 });
 
 // Task to seed users into database
