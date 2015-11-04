@@ -27,25 +27,26 @@ describe('usersapi', function() {
       expect(service.response.statusCode).to.equal(200);
       expect(data).to.eql({
           users: [
-                  {
-                      _id: "5603d450951764890c6d012d"
-                    , name: "Kushal D'Souza"
-                    , facebook_id: "10156106043525077"
-                    , facebook: {
-                          name: "Kushal D'Souza"
-                        , id: "10156106043525077"
-                        }
-                    , __v: 0
-                  }, {
-                      _id: "5603d450951764890c6d013d"
-                    , name: "Test User"
-                    , facebook_id: "10156106043525333"
-                    , facebook: {
-                        name: "Test User"
-                      , id: "10156106043525333"
-                    }
-                    , __v: 0
+            {
+                _id: "5603d450951764890c6d013e"
+              , name: "Test User"
+              , facebook_id: "10156106043525333"
+              , facebook: {
+                  name: "Test User"
+                , id: "10156106043525333"
+              }
+              , __v: 0
+            },
+            {
+                _id: "5603d450951764890c6d012d"
+              , name: "Kushal D'Souza"
+              , facebook_id: "10156106043525077"
+              , facebook: {
+                    name: "Kushal D'Souza"
+                  , id: "10156106043525077"
                   }
+              , __v: 0
+            }
                 ]
       });
       done();
