@@ -3,22 +3,17 @@ var mongoose = require('mongoose')
   , HttpStatus = require('http-status');
 
 module.exports = function(req, res) {
-  var data = req.body;
 
-  var requiredFields = {
-      name: 'Field is required'
-  };
-
-  // check if required fields are present
-  if(!data.name) {
-    res.status(HttpStatus.BAD_REQUEST);
-    res.json({
-        success: false
-      , message: requiredFields
-    });
-  } else {
-    // check if user is authorised
-    if (req.session.auth) {
+  // check if user is authorised
+  if(req.session.auth) {
+    // check if required fields are present
+    if(!data.name) {
+      res.status(HttpStatus.BAD_REQUEST);
+      res.json({
+          success: false
+        , message: requiredFields
+      });
+    } else {
       var board = new Board({
           name: data.name
         , owner: req.user._id
@@ -37,12 +32,16 @@ module.exports = function(req, res) {
           });
         }
       });
-
-    } else {
-      res.status(HttpStatus.UNAUTHORIZED);
-      res.json({
-        message: 'You need to be logged in to view this information'
-      });
     }
+  } else {
+    res.status(HttpStatus.UNAUTHORIZED);
+    res.json({
+      message: 'You need to be logged in to view this information'
+    });
   }
+  var data = req.body;
+
+  var requiredFields = {
+      name: 'Field is required'
+  };
 };

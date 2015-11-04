@@ -4,7 +4,8 @@ var expect = require('expect.js')
   , mockHandler = require('./helpers/mockHandler')
   , User = require('../models/user')
   , Board = require('../models/Board')
-  , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner');
+  , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner')
+  , addBoard = require('../routes/boards/addBoard');
 
 describe('usersapi', function() {
 
@@ -17,7 +18,7 @@ describe('usersapi', function() {
       mongoose.connection.close();
     });
 
-    it('should return a valid message and status code if the user is not logged in', function(done) {
+    it('should return a valid message and status code if the user is not logged in while trying to retrieve boards that are owned by the user', function(done) {
       var service = mockHandler('GET', '/users');
 
       service.request.session = {
@@ -67,5 +68,21 @@ describe('usersapi', function() {
         });
         done();
       });
+    });
+
+    it('should display a valid message and status code if the user is not logged in while trying to add a board', function(done) {
+      var service = mockHandler('GET', '/users');
+
+      service.request.session = {
+        auth: false
+      };
+      addBoard(service.request, service.response);
+
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
     });
   });
