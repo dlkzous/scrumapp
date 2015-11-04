@@ -17,6 +17,22 @@ describe('usersapi', function() {
       mongoose.connection.close();
     });
 
+    it('should return a valid message and status code if the user is not logged in', function(done) {
+      var service = mockHandler('GET', '/users');
+
+      service.request.session = {
+        auth: false
+      };
+      getAllBoardsByOwner(service.request, service.response);
+
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+
     it('should list all boards owned by the user', function(done) {
       var service = mockHandler('GET', '/users', true);
 
