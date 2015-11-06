@@ -7,7 +7,7 @@ var expect = require('expect.js')
   , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner')
   , addBoard = require('../routes/boards/addBoard');
 
-describe('usersapi', function() {
+describe('boardsapi', function() {
 
     before(function () {
       /** Connect to database and load models **/
@@ -19,7 +19,7 @@ describe('usersapi', function() {
     });
 
     it('should return a valid message and status code if the user is not logged in while trying to retrieve boards that are owned by the user', function(done) {
-      var service = mockHandler('GET', '/users');
+      var service = mockHandler('GET', '/boards');
 
       service.request.session = {
         auth: false
@@ -35,7 +35,7 @@ describe('usersapi', function() {
     });
 
     it('should list all boards owned by the user', function(done) {
-      var service = mockHandler('GET', '/users', true);
+      var service = mockHandler('GET', '/boards', true);
 
       service.request = {
           session: {
@@ -71,7 +71,7 @@ describe('usersapi', function() {
     });
 
     it('should display a valid message and status code if the user is not logged in while trying to add a board', function(done) {
-      var service = mockHandler('GET', '/users');
+      var service = mockHandler('GET', '/boards');
 
       service.request.session = {
         auth: false
@@ -84,5 +84,52 @@ describe('usersapi', function() {
         message: 'You need to be logged in to view this information'
       });
       done();
+    });
+
+    it('should return an error message if the board name is not provided', function(done) {
+      var service = mockHandler('GET', '/users');
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {}
+      };
+
+      addBoard(service.request, service.response);
+
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(400);
+      expect(data).to.eql({
+          success: false
+        , message: {
+          name: 'Field is required'
+        }
+      });
+      done();
+    });
+
+    it('should succesfully add a board if the user is logged in', function(done) {
+      var service = mockHandler('GET', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {
+          name: 'Test Board'
+        }
+      };
+
+      addBoard(service.request, service.response);
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(200);
+        expect(data.board.name).to.eql('Test Board');
+        expect(data.board.owner).to.eql('5603d450951764890c6d013e');
+        done();
+      });
     });
   });

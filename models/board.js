@@ -5,8 +5,8 @@ var mongoose = require('mongoose')
  * Schema
  */
 var BoardSchema = Schema({
-    name: String
-  , owner: { type: Schema.Types.ObjectId, ref: 'User' }
+    name: {type: String, required: 'Name is required'}
+  , owner: { type: Schema.Types.ObjectId, ref: 'User', required: 'Owner is required' }
   , members: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
