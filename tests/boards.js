@@ -5,7 +5,8 @@ var expect = require('expect.js')
   , User = require('../models/user')
   , Board = require('../models/Board')
   , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner')
-  , addBoard = require('../routes/boards/addBoard');
+  , addBoard = require('../routes/boards/addBoard')
+  , addMember = require('../routes/boards/addMember');
 
 describe('boardsapi', function() {
 
@@ -111,7 +112,7 @@ describe('boardsapi', function() {
     });
 
     it('should succesfully add a board if the user is logged in', function(done) {
-      var service = mockHandler('GET', '/boards', true);
+      var service = mockHandler('POST', '/boards', true);
 
       service.request = {
           session: {
@@ -131,5 +132,49 @@ describe('boardsapi', function() {
         expect(data.board.owner).to.eql('5603d450951764890c6d013e');
         done();
       });
+    });
+    
+    it('should return a valid status code and error message if the user tries to add a member to a board when unauthenticated', function(done) {
+      var service = mockHandler('POST', '/boards');
+      
+      service.request = {
+        session: {
+          auth: false
+        }
+      };
+      
+      addMember(service.request, service.response);
+      
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+    
+    it('should return a valid status code and error message if any of the required fields are absent', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {
+        }
+      };
+
+      addMember(service.request, service.response);
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.eql(400);
+      expect(data).to.eql({
+          success: false
+        , message: {
+            memberid: 'Field is required'
+          , boardid: 'Field is required'
+        }
+      });
+      done();
     });
   });
