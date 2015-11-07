@@ -2,6 +2,15 @@ var mongoose = require('mongoose')
   , Board = mongoose.model('Board')
   , HttpStatus = require('http-status')
   , User = mongoose.model('User');
+  
+var _failedRequest = function(res, err) {
+  if(err && err.message !== 'scrumapilocalerror') {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+    res.json({
+      err: err
+    });
+  }
+};
 
 module.exports = function(req, res) {
   // check if user is authorised
@@ -12,11 +21,11 @@ module.exports = function(req, res) {
         memberid: 'Field is required'
       , boardid: 'Field is required'
     };
-  
+    
     // check if required fields are present
     if(!data.memberid || !data.boardid) {
       res.status(HttpStatus.BAD_REQUEST);
-      res.json({
+      return res.json({
           success: false
         , message: requiredFields
       });
@@ -24,7 +33,7 @@ module.exports = function(req, res) {
       // Check if the board belongs to the user
       Board.findById(data.boardid).exec()
         .then(function(board) {
-          if(board.owner == req.user._id) {
+          if(board.owner.equals(req.user._id)) {
             // Check if the specified member exists
             return User.findById(data.memberid).exec();
           } else {
@@ -33,36 +42,33 @@ module.exports = function(req, res) {
                 success: false
               , message: 'Board does not belong to the user'
             });
+            throw new Error('scrumapilocalerror');
           }
         })
-        .then(function(members) {
+        .then(function(member) {
           // if member exists, add the member, else send error
-          if(members && members.length > 0) {
+          if(member) {
             // Add to the board
-            return Board.findByIdAndUpdate(
-              data.boarid
-            , {$push: {members: data.memberid}}
-            , {upsert: false}).exec();
+            return Board.update(
+              {_id: data.boardid}
+            , {$addToSet: {members: member._id}}
+            , {upsert: false});
           } else {
             res.status(HttpStatus.BAD_REQUEST);
             res.json({
                 success: false
               , message: 'Given user does not exist'
             });
+            throw new Error('scrumapilocalerror');
           }
         })
-        .then(function(board){
+        .then(function(result){
           res.json({
               success: true
-            , board: board
+            , message: result.n + ' boards succesfully updated'
           });
         }, function(err) {
-          if(err) {
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            res.json({
-              err: err
-            });
-          }
+          _failedRequest(res, err);
         });
     }
   } else {

@@ -197,4 +197,30 @@ describe('boardsapi', function() {
       done();
       });
     });
+    
+    it('should succesfully add a member to the board if all the above validations pass', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+          _id: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        }, body: {
+            memberid: "5603d450951764890c6d013f"
+          , boardid: "562f8b09f1981ba016ada668"
+        }
+      };
+
+      addMember(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(200);
+        expect(data.success).to.eql(true);
+        expect(data.message).to.eql("1 boards succesfully updated");
+      done();
+      });
+    });
   });
