@@ -63,16 +63,42 @@ gulp.task('start', function(callback) {
   runSequence('startdb', 'startserver', callback);
 });
 
-// Task to run mocha test
-gulp.task('mochatest', function() {
+// Task to run tests on index route
+gulp.task('testindex', function() {
   // Run test
-  return gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'list'}));
+  return gulp.src('./tests/index.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
+});
+
+// Task to run tests on users route
+gulp.task('testusers', function() {
+  // Run test
+  return gulp.src('./tests/users.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
+});
+
+// Task to run tests on boards route
+gulp.task('testboards', function() {
+  // Run test
+  return gulp.src('./tests/boards.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
 });
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('startdb', 'seedusers', 'seedboards', 'mochatest', 'stopdb', callback);
+  runSequence('startdb', 'seedusers', 'seedboards', 'testindex', 'testusers', 'testboards', 'stopdb', callback);
 });
 
 // Task to seed users into database

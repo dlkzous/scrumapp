@@ -17,7 +17,7 @@ describe('usersapi', function() {
     mongoose.connection.close();
   });
 
-  it('should return a list with two users', function(done) {
+  it('should return a list with three users', function(done) {
 
     var service = mockHandler('GET', '/users', true);
 
@@ -27,6 +27,16 @@ describe('usersapi', function() {
       expect(service.response.statusCode).to.equal(200);
       expect(data).to.eql({
           users: [
+            {
+                _id: "5603d450951764890c6d013f"
+              , name: "Test User Three"
+              , facebook_id: "10156106043525548"
+              , facebook: {
+                  name: "Test User Three"
+                , id: "10156106043525548"
+              }
+              , __v: 0
+            },
             {
                 _id: "5603d450951764890c6d013e"
               , name: "Test User"

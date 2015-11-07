@@ -23,13 +23,19 @@ module.exports = function(req, res) {
     } else {
       // Check if the board belongs to the user
       Board.findById(data.boardid).exec()
-        .then(function(err, board) {
+        .then(function(board) {
           if(board.owner == req.user._id) {
             // Check if the specified member exists
             return User.findById(data.memberid).exec();
+          } else {
+            res.status(HttpStatus.BAD_REQUEST);
+            res.json({
+                success: false
+              , message: 'Board does not belong to the user'
+            });
           }
         })
-        .then(function(err, members) {
+        .then(function(members) {
           // if member exists, add the member, else send error
           if(members && members.length > 0) {
             // Add to the board
@@ -45,16 +51,16 @@ module.exports = function(req, res) {
             });
           }
         })
-        .then(function(err, board){
+        .then(function(board){
+          res.json({
+              success: true
+            , board: board
+          });
+        }, function(err) {
           if(err) {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
               err: err
-            });
-          } else {
-            res.json({
-                success: true
-              , board: board
             });
           }
         });

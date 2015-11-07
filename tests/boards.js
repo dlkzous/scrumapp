@@ -52,13 +52,6 @@ describe('boardsapi', function() {
         expect(data).to.eql({
           boards: [
             {
-              _id: "562f8b09f1981ba016ada667",
-              name: "third board",
-              owner: "5603d450951764890c6d013e",
-              __v: 0,
-              members: [ ]
-            },
-            {
               _id: "562f8b09f1981ba016ada668",
               name: "second board",
               owner: "5603d450951764890c6d013e",
@@ -154,7 +147,7 @@ describe('boardsapi', function() {
     });
     
     it('should return a valid status code and error message if any of the required fields are absent', function(done) {
-      var service = mockHandler('POST', '/boards', true);
+      var service = mockHandler('POST', '/boards');
 
       service.request = {
           session: {
@@ -176,5 +169,32 @@ describe('boardsapi', function() {
         }
       });
       done();
+    });
+    
+    it('should give an appropriate error message if the user tries to add a member to a board that the user does not own', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {
+            memberid: "5603d450951764890c6d013f"
+          , boardid: "562f8b09f1981ba016ada669"
+        }
+      };
+
+      addMember(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(400);
+        expect(data).to.eql({
+            success: false
+          , message: 'Board does not belong to the user'
+        });
+      done();
+      });
     });
   });

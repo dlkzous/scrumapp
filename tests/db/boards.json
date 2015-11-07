@@ -1,22 +1,22 @@
 [
   {
-    "_id": "562f8b09f1981ba016ada669",
+    "_id": ObjectId("562f8b09f1981ba016ada669"),
     "name": "test board",
-    "owner": "5603d450951764890c6d013d",
+    "owner": ObjectId("5603d450951764890c6d013d"),
     "__v": 0,
     "members": [ ]
   },
   {
-    "_id": "562f8b09f1981ba016ada668",
+    "_id": ObjectId("562f8b09f1981ba016ada668"),
     "name": "second board",
     "owner": ObjectId("5603d450951764890c6d013e"),
     "__v": 0,
     "members": [ ]
   },
   {
-    "_id": "562f8b09f1981ba016ada667",
+    "_id": ObjectId("562f8b09f1981ba016ada667"),
     "name": "third board",
-    "owner": ObjectId("5603d450951764890c6d013e"),
+    "owner": ObjectId("5603d450951764890c6d013f"),
     "__v": 0,
     "members": [ ]
   }
