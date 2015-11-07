@@ -6,7 +6,8 @@ var expect = require('expect.js')
   , Board = require('../models/Board')
   , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner')
   , addBoard = require('../routes/boards/addBoard')
-  , addMember = require('../routes/boards/addMember');
+  , addMember = require('../routes/boards/addMember')
+  , getAllBoardsBelongedTo = require('../routes/boards/getAllBoardsBelongedTo');
 
 describe('boardsapi', function() {
 
@@ -220,6 +221,47 @@ describe('boardsapi', function() {
         expect(service.response.statusCode).to.eql(200);
         expect(data.success).to.eql(true);
         expect(data.message).to.eql("1 boards succesfully updated");
+      done();
+      });
+    });
+    
+    it('should return a valid error message and status code if the user tries to retrieve boards that he belongs to without autorisation', function(done) {
+      var service = mockHandler('GET', '/boards');
+      
+      service.request = {
+        session: {
+          auth: false
+        }
+      };
+      
+      getAllBoardsBelongedTo(service.request, service.response);
+      
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+    
+    it('should return a list of boards that he user belongs to if authorised', function(done) {
+      var service = mockHandler('GET', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+          _id: mongoose.Types.ObjectId("5603d450951764890c6d013f")
+        }
+      };
+
+      getAllBoardsBelongedTo(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(200);
+        expect(data.boards[0]._id).to.eql("562f8b09f1981ba016ada668");
       done();
       });
     });
