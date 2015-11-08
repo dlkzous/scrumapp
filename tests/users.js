@@ -48,7 +48,7 @@ describe('usersapi', function() {
               , __v: 0
             },
             {
-                _id: "5603d450951764890c6d012d"
+                _id: "563e8fea8b56be8e44595a52"
               , name: "Kushal D'Souza"
               , facebook_id: "10156106043525077"
               , facebook: {

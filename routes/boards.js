@@ -3,12 +3,14 @@ var express = require('express')
   , getAllBoardsByOwner = require('./boards/getAllBoardsByOwner')
   , getAllBoardsBelongedTo = require('./boards/getAllBoardsBelongedTo')
   , addBoard = require('./boards/addBoard')
-  , addMember = require('./boards/addMember');
+  , addMember = require('./boards/addMember')
+  , getAllBoardMembers = require('./boards/getAllBoardMembers');
 
-router.route('/')
+  
+router.route('/owned')
   .get(getAllBoardsByOwner);
 
-router.route('/other')
+router.route('/belongedTo')
   .get(getAllBoardsBelongedTo);
 
 router.route('/add')
@@ -16,5 +18,8 @@ router.route('/add')
 
 router.route('/addmember')
   .post(addMember);
+  
+ router.route('/getAllBoardMembers')
+  .get(getAllBoardMembers);
 
 module.exports = router;

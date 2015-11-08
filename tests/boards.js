@@ -7,7 +7,8 @@ var expect = require('expect.js')
   , getAllBoardsByOwner = require('../routes/boards/getAllBoardsByOwner')
   , addBoard = require('../routes/boards/addBoard')
   , addMember = require('../routes/boards/addMember')
-  , getAllBoardsBelongedTo = require('../routes/boards/getAllBoardsBelongedTo');
+  , getAllBoardsBelongedTo = require('../routes/boards/getAllBoardsBelongedTo')
+  , getAllBoardMembers = require('../routes/boards/getAllBoardMembers');
 
 describe('boardsapi', function() {
 
@@ -195,7 +196,7 @@ describe('boardsapi', function() {
             success: false
           , message: 'Board does not belong to the user'
         });
-      done();
+        done();
       });
     });
     
@@ -263,6 +264,97 @@ describe('boardsapi', function() {
         expect(service.response.statusCode).to.eql(200);
         expect(data.boards[0]._id).to.eql("562f8b09f1981ba016ada668");
       done();
+      });
+    });
+    
+    it('should return a valid status code and message if an unauthorised user tries to retrieve the list of members of a board', function(done) {
+      var service = mockHandler('GET', '/boards');
+
+      service.request = {
+          session: {
+            auth: false
+          }
+      };
+
+      getAllBoardMembers(service.request, service.response);
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.eql(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+    
+    it('should ensure the board belongs to the user before returning the list of members', function(done) {
+      var service = mockHandler('GET', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+          _id: mongoose.Types.ObjectId("5603d450951764890c6d013f")
+        }
+        , params: {
+          id: "562f8b09f1981ba016ada668"
+        }
+      };
+
+      getAllBoardMembers(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(400);
+        expect(data).to.eql({
+            success: false
+          , message: 'Board does not belong to the user'
+        });
+        done();
+      });
+    });
+    
+    it('should list the members belonging to a given board if the user is authorised and owns the board', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+          _id: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        }, body: {
+            memberid: "563e8fea8b56be8e44595a52"
+          , boardid: "562f8b09f1981ba016ada668"
+        }
+      };
+
+      addMember(service.request, service.response);
+      
+      service.response.on('end', function() {
+        
+        service = mockHandler('GET', '/boards', true);
+
+        service.request = {
+            session: {
+              auth: true
+            }
+          , user: {
+            _id: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+          }
+          , params: {
+            id: "562f8b09f1981ba016ada668"
+          }
+        };
+  
+        getAllBoardMembers(service.request, service.response);
+        
+        service.response.on('end', function() {
+          var data = JSON.parse(service.response._getData());
+          expect(service.response.statusCode).to.eql(200);
+          expect(data.users[0]._id).to.eql("5603d450951764890c6d013f");
+          expect(data.users[1]._id).to.eql("563e8fea8b56be8e44595a52");
+          done();
+      });
       });
     });
   });

@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
   , Board = mongoose.model('Board')
   , HttpStatus = require('http-status');
 
-// Function to get all users from the database
+// Function to get all boards that a given user belongs to from the database
 module.exports = function(req, res){
   
   // check if the user is logged in

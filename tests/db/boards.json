@@ -1,7 +1,7 @@
 [
   {
     "_id": ObjectId("562f8b09f1981ba016ada669"),
-    "name": "test board",
+    "name": "first board",
     "owner": ObjectId("5603d450951764890c6d013d"),
     "__v": 0,
     "members": [ ]
