@@ -23,11 +23,7 @@ module.exports = function(req, res){
         
         // ensure board belongs to user
         if(board.owner.equals(req.user._id)) {
-          // get all the individual board members
-          // var list = [];
-          // for(var x=0; x<board.members.length; x++) {
-          //   list.push(new ObjectId(board.members[x].toJSON()));
-          // }    
+          // get all the individual board members  
           return User.find({_id: { $in: board.members}}).exec(); 
         } else {
           res.status(HttpStatus.BAD_REQUEST);
