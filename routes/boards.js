@@ -5,7 +5,8 @@ var express = require('express')
   , addBoard = require('./boards/addBoard')
   , addMember = require('./boards/addMember')
   , getAllBoardMembers = require('./boards/getAllBoardMembers')
-  , editBoard = require('.boards/editBoard');
+  , editBoard = require('.boards/editBoard')
+  , removeMember = require('./boards/removeMember');
   
 router.route('/owned')
   .get(getAllBoardsByOwner);
@@ -18,6 +19,9 @@ router.route('/add')
 
 router.route('/addmember')
   .post(addMember);
+  
+router.route('/removemember')
+  .post(removeMember);
   
  router.route('/getAllBoardMembers')
   .get(getAllBoardMembers);

@@ -10,7 +10,8 @@ var expect = require('expect.js')
   , getAllBoardsBelongedTo = require('../routes/boards/getAllBoardsBelongedTo')
   , getAllBoardMembers = require('../routes/boards/getAllBoardMembers')
   , editBoard = require('../routes/boards/editBoard')
-  , deleteBoard = require('../routes/boards/removeBoard');
+  , deleteBoard = require('../routes/boards/removeBoard')
+  , removeMember = require('../routes/boards/removeMember');
 
 describe('boardsapi', function() {
 
@@ -475,6 +476,103 @@ describe('boardsapi', function() {
           , message: 'Board does not belong to the user'
         });
         done();
+      });
+    });
+    
+    it('should return a valid status code and error message if the user tries to remove a member from a board when unauthenticated', function(done) {
+      var service = mockHandler('POST', '/boards');
+      
+      service.request = {
+        session: {
+          auth: false
+        }
+      };
+      
+      removeMember(service.request, service.response);
+      
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+    
+    it('should return a valid status code and error message if any of the required fields are absent', function(done) {
+      var service = mockHandler('POST', '/boards');
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {
+        }
+      };
+
+      removeMember(service.request, service.response);
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.eql(400);
+      expect(data).to.eql({
+          success: false
+        , message: {
+            memberid: 'Field is required'
+          , boardid: 'Field is required'
+        }
+      });
+      done();
+    });
+    
+    it('should give an appropriate error message if the user tries to remove a member from a board that the user does not own', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , body: {
+            memberid: "5603d450951764890c6d013f"
+          , boardid: "562f8b09f1981ba016ada669"
+        }
+      };
+
+      removeMember(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(400);
+        expect(data).to.eql({
+            success: false
+          , message: 'Board does not belong to the user'
+        });
+        done();
+      });
+    });
+    
+    it('should succesfully remove a member from the board if all the above validations pass', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+          _id: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        }, body: {
+            memberid: "5603d450951764890c6d013f"
+          , boardid: "562f8b09f1981ba016ada668"
+        }
+      };
+
+      removeMember(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(200);
+        expect(data.success).to.eql(true);
+        expect(data.message).to.eql("1 boards succesfully updated");
+      done();
       });
     });
     
