@@ -9,7 +9,8 @@ var expect = require('expect.js')
   , addMember = require('../routes/boards/addMember')
   , getAllBoardsBelongedTo = require('../routes/boards/getAllBoardsBelongedTo')
   , getAllBoardMembers = require('../routes/boards/getAllBoardMembers')
-  , editBoard = require('../routes/boards/editBoard');
+  , editBoard = require('../routes/boards/editBoard')
+  , deleteBoard = require('../routes/boards/removeBoard');
 
 describe('boardsapi', function() {
 
@@ -430,6 +431,76 @@ describe('boardsapi', function() {
         expect(data).to.eql({
             success: true
           , message: 'Board updated successfully'
+        });
+        done();
+      });
+    });
+    
+    it('should not allow an unauthenticated user to delete a baord', function(done) {
+      var service = mockHandler('GET', '/boards');
+
+      service.request.session = {
+        auth: false
+      };
+      deleteBoard(service.request, service.response);
+
+      var data = JSON.parse(service.response._getData());
+      expect(service.response.statusCode).to.equal(401);
+      expect(data).to.eql({
+        message: 'You need to be logged in to view this information'
+      });
+      done();
+    });
+    
+    it('should ensure that the user is trying to delete a board that belongs to the user', function(done){
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        , params: {
+            id: "562f8b09f1981ba016ada669"
+        }
+      };
+
+      deleteBoard(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(400);
+        expect(data).to.eql({
+            success: false
+          , message: 'Board does not belong to the user'
+        });
+        done();
+      });
+    });
+    
+    it('should succesfully delete a board of an authenticated user', function(done) {
+      var service = mockHandler('POST', '/boards', true);
+
+      service.request = {
+          session: {
+            auth: true
+          }
+        , user: {
+            _id: mongoose.Types.ObjectId("5603d450951764890c6d013e")
+        }
+        , params: {
+            id: "562f8b09f1981ba016ada668"
+        }
+      };
+
+      deleteBoard(service.request, service.response);
+      
+      service.response.on('end', function() {
+        var data = JSON.parse(service.response._getData());
+        expect(service.response.statusCode).to.eql(200);
+        expect(data).to.eql({
+            success: true
+          , message: 'Board deleted successfully'
         });
         done();
       });
