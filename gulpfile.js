@@ -63,22 +63,69 @@ gulp.task('start', function(callback) {
   runSequence('startdb', 'startserver', callback);
 });
 
-// Task to run mocha test
-gulp.task('mochatest', function() {
+// Task to run tests on index route
+gulp.task('testindex', function() {
   // Run test
-  return gulp.src('./tests/main.js', {read: false})
-    .pipe(mocha({reporter: 'list'}));
+  return gulp.src('./tests/index.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
+});
+
+// Task to run tests on users route
+gulp.task('testusers', function() {
+  // Run test
+  return gulp.src('./tests/users.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
+});
+
+// Task to run tests on boards route
+gulp.task('testboards', function() {
+  // Run test
+  return gulp.src('./tests/boards.js', {read: false})
+  .pipe(mocha({reporter: 'list'}))
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  });
 });
 
 // Task to run start db server, run test and then shutdown db
 gulp.task('test', function(callback) {
-  runSequence('startdb', 'seed', 'mochatest', 'stopdb', callback);
+  runSequence('startdb', 'seedusers', 'seedboards', 'testindex', 'testusers', 'testboards', 'stopdb', callback);
 });
 
-// Task to seed database
-gulp.task('seed', function() {
+// Task to seed users into database
+gulp.task('seedusers', function() {
   // Seed users
   child_process.exec('mongoimport --db scrumapi --collection users --file ./tests/db/users.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    return stdout;
+  });
+});
+
+// Task to seed boards into database
+gulp.task('seedboards', function() {
+  // Seed users
+  child_process.exec('mongoimport --db scrumapi --collection boards --file ./tests/db/boards.json --jsonArray --host 127.0.0.1 --drop', function(err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    return stdout;
+  });
+});
+
+// Task to delete all test data
+gulp.task('removedata', function() {
+  // Remove data
+  // Seed users
+  child_process.exec('mongo scrumapi --eval "db.users.remove({});db.boards.remove({})"', function(err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     return stdout;

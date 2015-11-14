@@ -1,5 +1,4 @@
-var appPath = __dirname
-  , express = require('express')
+var express = require('express')
   , path = require('path')
   , favicon = require('serve-favicon')
   , logger = require('morgan')
@@ -8,11 +7,9 @@ var appPath = __dirname
   , bodyParser = require('body-parser')
   , HttpStatus = require('http-status')
   , path = require('path')
-  , fs = require('fs')
   , mongoose = require('mongoose')
   , everyauth = require('everyauth')
-  , config = require('./config.js')
-  , secretdata = require('./secretdata.js')
+  , secretdata = require('./secretdata')
   , MongoStore = require('connect-mongo')(session);
 
 var app = express();
@@ -24,67 +21,8 @@ if(app.get('env') === 'development') {
   everyauth.debug = false;
 }
 
-/** Connect to database and load models **/
-mongoose.connect(config.dbPath);
-var models_path = appPath + '/models';
-fs.readdirSync(models_path).forEach(function (file) {
-    require(models_path+'/'+file);
-});
-var UserModel = mongoose.model('User');
-
-/**
- * Social login integration using Facebook
- */
-everyauth.everymodule.findUserById(function(userId,callback) {
-    UserModel.findOne({_id: userId},function(err, user) {
-        callback(err, user);
-    });
-});
-everyauth.facebook
-    .appId(secretdata.FACEBOOK_APP_ID)
-    .appSecret(secretdata.FACEBOOK_APP_SECRET)
-    .scope('email,user_location,user_photos,publish_actions')
-    .handleAuthCallbackError( function (req, res) {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-        res.json({
-          message: 'Error Occured'
-        });
-    })
-    .findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
-
-        var promise = this.Promise();
-        UserModel.findOne({facebook_id: fbUserMetadata.id},function(err, user) {
-            if (err) return promise.fulfill([err]);
-
-            if(user) {
-                // user found, life is good
-                promise.fulfill(user);
-            } else {
-                // create new user
-                var User = new UserModel({
-                    name: fbUserMetadata.name,
-                    firstname: fbUserMetadata.first_name,
-                    lastname: fbUserMetadata.last_name,
-                    email: fbUserMetadata.email,
-                    username: fbUserMetadata.username,
-                    gender: fbUserMetadata.gender,
-                    facebook_id: fbUserMetadata.id,
-                    facebook: fbUserMetadata
-                });
-
-                User.save(function(err,user) {
-                    if (err) return promise.fulfill([err]);
-                    promise.fulfill(user);
-                });
-            }
-        });
-        return promise;
-    })
-    .redirectPath('/');
-
-
-var routes = require('./routes/index')
-  , users = require('./routes/users');
+require('./models');
+var routes = require('./routes');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -100,8 +38,7 @@ app.use(session({
 }));
 app.use(everyauth.middleware());
 
-app.use('/', routes);
-app.use('/users', users);
+require('./paths')(app, routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

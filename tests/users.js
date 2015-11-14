@@ -11,17 +11,13 @@ describe('usersapi', function() {
   before(function () {
     /** Connect to database and load models **/
     mongoose.connect(config.dbPath);
-
-    // Pull in the models required for this test
-    require('../models/user');
-    var UserModel = mongoose.model('User');
   });
 
   after(function() {
     mongoose.connection.close();
   });
 
-  it('should return a list with a single user', function(done) {
+  it('should return a list with three users', function(done) {
 
     var service = mockHandler('GET', '/users', true);
 
@@ -31,16 +27,36 @@ describe('usersapi', function() {
       expect(service.response.statusCode).to.equal(200);
       expect(data).to.eql({
           users: [
-                  {
-                      _id: "5603d450951764890c6d012d"
-                    , name: "Kushal D'Souza"
-                    , facebook_id: "10156106043525077"
-                    , facebook: {
-                          name: "Kushal D'Souza"
-                        , id: "10156106043525077"
-                        }
-                    , __v: 0
+            {
+                _id: "5603d450951764890c6d013f"
+              , name: "Test User Three"
+              , facebook_id: "10156106043525548"
+              , facebook: {
+                  name: "Test User Three"
+                , id: "10156106043525548"
+              }
+              , __v: 0
+            },
+            {
+                _id: "5603d450951764890c6d013e"
+              , name: "Test User"
+              , facebook_id: "10156106043525333"
+              , facebook: {
+                  name: "Test User"
+                , id: "10156106043525333"
+              }
+              , __v: 0
+            },
+            {
+                _id: "563e8fea8b56be8e44595a52"
+              , name: "Kushal D'Souza"
+              , facebook_id: "10156106043525077"
+              , facebook: {
+                    name: "Kushal D'Souza"
+                  , id: "10156106043525077"
                   }
+              , __v: 0
+            }
                 ]
       });
       done();

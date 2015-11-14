@@ -1,0 +1,23 @@
+[
+  {
+    "_id": ObjectId("562f8b09f1981ba016ada669"),
+    "name": "first board",
+    "owner": ObjectId("5603d450951764890c6d013d"),
+    "__v": 0,
+    "members": [ ]
+  },
+  {
+    "_id": ObjectId("562f8b09f1981ba016ada668"),
+    "name": "second board",
+    "owner": ObjectId("5603d450951764890c6d013e"),
+    "__v": 0,
+    "members": [ ]
+  },
+  {
+    "_id": ObjectId("562f8b09f1981ba016ada667"),
+    "name": "third board",
+    "owner": ObjectId("5603d450951764890c6d013f"),
+    "__v": 0,
+    "members": [ ]
+  }
+]
